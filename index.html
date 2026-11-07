@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#0c1012">
+  <meta name="description" content="안 쓰는 코드만 제거하고 신호는 지켜라. Remove Dead Code를 플레이하는 90초 액션 퍼즐, DEAD / DROP.">
+  <meta name="app-build" content="__BUILD_ID__">
+  <title>DEAD / DROP — 코드를 덜어라, 신호를 지켜라</title>
+  <link rel="icon" type="image/svg+xml" href="__ICON_URL__">
+  <link rel="stylesheet" href="__STYLE_URL__">
+</head>
+<body>
+<div class="app-shell">
+  <header class="topbar">
+    <a class="brand" href="#/" data-route="/" aria-label="DEAD DROP 시작 화면"><img src="__ICON_URL__" alt="" width="32" height="32"><span>DEAD <i>/</i> DROP<span class="brand-edition">REFACTORING ARCADE</span></span></a>
+    <nav class="nav-links" aria-label="주 메뉴"><a href="#/guide" data-route="/guide"><span>01</span> 플레이 가이드</a><a href="#/records" data-route="/records"><span>02</span> 내 기록</a></nav>
+    <button class="sound-toggle" type="button" aria-pressed="false"><span aria-hidden="true">◌</span> 소리 꺼짐</button>
+  </header>
+  <aside class="update-banner" id="update-banner" aria-live="polite" hidden></aside>
+  <main id="app" tabindex="-1"><div class="loading-screen"><span class="status-dot"></span> 신호를 연결하고 있어요…</div></main>
+  <footer class="site-footer"><span>LESS CODE. SAME SIGNAL.</span><span>지울 것은 지우고, 필요한 것은 지켜라. <i>↗</i></span></footer>
+</div>
+<div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
+<dialog class="modal" id="guard-dialog" aria-labelledby="guard-title">
+  <div class="modal-card">
+    <p class="eyebrow">KEEP YOUR PROGRESS</p><h2 id="guard-title">진행을 챙기고 이동할까요?</h2>
+    <p id="guard-description">제거한 블록과 남은 시간을 저장하고 이어할 수 있어요.</p>
+    <p id="guard-error" role="alert" hidden></p>
+    <div class="hero-actions"><button class="btn btn-primary" data-guard="save">저장 후 이동 ↗</button><button class="btn btn-secondary" data-guard="stay">여기 머무르기</button><button class="btn btn-ghost" data-guard="discard">저장 없이 이동</button></div>
+  </div>
+</dialog>
+<noscript>이 게임을 플레이하려면 브라우저의 JavaScript를 켜 주세요.</noscript>
+<script type="module" src="__ENTRY_URL__"></script>
+</body></html>

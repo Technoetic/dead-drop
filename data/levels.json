@@ -1,0 +1,787 @@
+{
+  "schema": 1,
+  "id": "dead-drop-v1",
+  "levels": [
+    {
+      "id": "cold-start",
+      "title": "COLD START",
+      "subtitle": "01 / 사용하지 않는 순수 값",
+      "mission": "버려진 계산을 제거하세요. 실제 출력으로 이어지는 신호는 지켜야 합니다.",
+      "lesson": "출력이나 효과로 이어지지 않는 순수 계산은 제거할 수 있습니다. 이 게임의 카드에는 표시되지 않은 숨은 효과가 없습니다.",
+      "hint": "화면에 표시되는 결과에서 의존성을 거슬러 올라가세요. 어떤 계산이 결과에 쓰이지 않나요?",
+      "cards": [
+        {
+          "id": "base",
+          "label": "기본 신호",
+          "description": "실제 결과가 읽는 입력입니다.",
+          "code": "const base = amount;",
+          "expr": {
+            "op": "input",
+            "key": "amount"
+          }
+        },
+        {
+          "id": "result",
+          "label": "실제 신호",
+          "description": "기본 값을 두 배로 만들어 화면에 보냅니다.",
+          "code": "const result = base * 2;",
+          "expr": {
+            "op": "mul",
+            "args": [
+              {
+                "op": "ref",
+                "id": "base"
+              },
+              {
+                "op": "const",
+                "value": 2
+              }
+            ]
+          }
+        },
+        {
+          "id": "debug-total",
+          "label": "디버그 합계",
+          "description": "사용하는 곳이 없는 순수 계산의 잔재입니다.",
+          "code": "const debugTotal = base + 99;",
+          "expr": {
+            "op": "add",
+            "args": [
+              {
+                "op": "ref",
+                "id": "base"
+              },
+              {
+                "op": "const",
+                "value": 99
+              }
+            ]
+          }
+        }
+      ],
+      "scenarios": [
+        {
+          "id": "positive",
+          "label": "양수 신호",
+          "input": {
+            "amount": 3
+          }
+        },
+        {
+          "id": "zero",
+          "label": "0 신호",
+          "input": {
+            "amount": 0
+          }
+        },
+        {
+          "id": "negative",
+          "label": "음수 신호",
+          "input": {
+            "amount": -2
+          }
+        }
+      ],
+      "roots": [
+        {
+          "id": "screen",
+          "type": "output",
+          "label": "화면 출력",
+          "card": "result"
+        }
+      ]
+    },
+    {
+      "id": "sealed-branch",
+      "title": "SEALED BRANCH",
+      "subtitle": "02 / 도달할 수 없는 분기",
+      "mission": "항상 닫혀 있는 분기 뒤의 흔적을 정리하세요. 죽은 블록은 두 개입니다.",
+      "lesson": "조건식은 선택된 분기만 평가합니다. 이 모델에서 조건은 항상 거짓이므로 과거 데이터에 도달할 수 없습니다.",
+      "hint": "조건은 아직 시험하지 않은 입력이 아니라 거짓 상수입니다. 실제로 실행할 수 있는 분기를 따라가세요.",
+      "cards": [
+        {
+          "id": "enabled",
+          "label": "폐기된 플래그",
+          "description": "이 조건은 항상 거짓입니다.",
+          "code": "const enabled = false;",
+          "expr": {
+            "op": "const",
+            "value": false
+          }
+        },
+        {
+          "id": "fossil",
+          "label": "과거 데이터",
+          "description": "도달할 수 없는 분기에서만 읽습니다.",
+          "code": "const fossil = \"ARCHIVE\";",
+          "expr": {
+            "op": "const",
+            "value": "ARCHIVE"
+          }
+        },
+        {
+          "id": "active",
+          "label": "현재 데이터",
+          "description": "선택된 분기는 현재 화물을 사용합니다.",
+          "code": "const active = cargo;",
+          "expr": {
+            "op": "input",
+            "key": "cargo"
+          }
+        },
+        {
+          "id": "route",
+          "label": "배송 경로",
+          "description": "조건에 따라 한쪽 분기만 읽습니다.",
+          "code": "const route = enabled ? fossil : active;",
+          "expr": {
+            "op": "choose",
+            "test": {
+              "op": "ref",
+              "id": "enabled"
+            },
+            "yes": {
+              "op": "ref",
+              "id": "fossil"
+            },
+            "no": {
+              "op": "ref",
+              "id": "active"
+            }
+          }
+        },
+        {
+          "id": "old-tag",
+          "label": "이전 태그",
+          "description": "어디서도 읽지 않는 과거 버전의 순수 값입니다.",
+          "code": "const oldTag = \"v0\";",
+          "expr": {
+            "op": "const",
+            "value": "v0"
+          }
+        }
+      ],
+      "scenarios": [
+        {
+          "id": "alpha",
+          "label": "화물 A",
+          "input": {
+            "cargo": "A"
+          }
+        },
+        {
+          "id": "beta",
+          "label": "화물 B",
+          "input": {
+            "cargo": "B"
+          }
+        }
+      ],
+      "roots": [
+        {
+          "id": "delivery",
+          "type": "output",
+          "label": "배송 결과",
+          "card": "route"
+        }
+      ]
+    },
+    {
+      "id": "silent-helper",
+      "title": "SILENT HELPER",
+      "subtitle": "03 / 호출하지 않는 헬퍼",
+      "mission": "아무도 호출하지 않는 헬퍼를 지우세요. 배송 요금 계산은 유지하세요.",
+      "lesson": "헬퍼를 선언했다고 실행의 진입점이 되는 것은 아닙니다. 출력·효과·콜백·외부 호출이 닿지 않는 순수 헬퍼는 이 모델에서 죽은 코드입니다.",
+      "hint": "다른 블록의 참조도, 선언된 호출자도 없는 헬퍼를 찾으세요.",
+      "cards": [
+        {
+          "id": "units",
+          "label": "배송 수량",
+          "description": "실제 요금 계산이 읽는 수량입니다.",
+          "code": "const units = quantity;",
+          "expr": {
+            "op": "input",
+            "key": "quantity"
+          }
+        },
+        {
+          "id": "charge",
+          "label": "배송 요금",
+          "description": "수량 하나당 3 크레딧입니다.",
+          "code": "const charge = units * 3;",
+          "expr": {
+            "op": "mul",
+            "args": [
+              {
+                "op": "ref",
+                "id": "units"
+              },
+              {
+                "op": "const",
+                "value": 3
+              }
+            ]
+          }
+        },
+        {
+          "id": "unit-helper",
+          "label": "이전 헬퍼",
+          "description": "이 헬퍼를 호출하는 진입점이 없습니다.",
+          "code": "const unitHelper = () => units + 1;",
+          "expr": {
+            "op": "add",
+            "args": [
+              {
+                "op": "ref",
+                "id": "units"
+              },
+              {
+                "op": "const",
+                "value": 1
+              }
+            ]
+          }
+        }
+      ],
+      "scenarios": [
+        {
+          "id": "four",
+          "label": "수량 4개",
+          "input": {
+            "quantity": 4
+          }
+        },
+        {
+          "id": "none",
+          "label": "수량 없음",
+          "input": {
+            "quantity": 0
+          }
+        },
+        {
+          "id": "one",
+          "label": "수량 1개",
+          "input": {
+            "quantity": 1
+          }
+        }
+      ],
+      "roots": [
+        {
+          "id": "charge-screen",
+          "type": "output",
+          "label": "요금 출력",
+          "card": "charge"
+        }
+      ]
+    },
+    {
+      "id": "second-signal",
+      "title": "SECOND SIGNAL",
+      "subtitle": "04 / 다른 입력의 경로",
+      "mission": "조용한 실행 흔적을 믿기 전에 다른 입력도 확인하세요.",
+      "lesson": "첫 실행에서는 특급 가격을 읽지 않지만 VIP 시나리오에서는 사용합니다. 한 번 실행되지 않았다는 이유만으로 죽은 코드라고 판단할 수 없습니다.",
+      "hint": "시나리오를 바꿔 보세요. 두 가격은 모두 사용되지만 잊힌 라벨은 사용되지 않습니다.",
+      "cards": [
+        {
+          "id": "selector",
+          "label": "VIP 선택 조건",
+          "description": "선언된 시나리오에 따라 달라지는 입력입니다.",
+          "code": "const selector = vip;",
+          "expr": {
+            "op": "input",
+            "key": "vip"
+          }
+        },
+        {
+          "id": "standard",
+          "label": "일반 가격",
+          "description": "VIP가 거짓일 때 사용합니다.",
+          "code": "const standard = 8;",
+          "expr": {
+            "op": "const",
+            "value": 8
+          }
+        },
+        {
+          "id": "express",
+          "label": "특급 가격",
+          "description": "VIP가 참일 때 사용합니다.",
+          "code": "const express = 3;",
+          "expr": {
+            "op": "const",
+            "value": 3
+          }
+        },
+        {
+          "id": "route-price",
+          "label": "선택된 가격",
+          "description": "시나리오 전체를 보면 양쪽 분기에 모두 도달합니다.",
+          "code": "const routePrice = selector ? express : standard;",
+          "expr": {
+            "op": "choose",
+            "test": {
+              "op": "ref",
+              "id": "selector"
+            },
+            "yes": {
+              "op": "ref",
+              "id": "express"
+            },
+            "no": {
+              "op": "ref",
+              "id": "standard"
+            }
+          }
+        },
+        {
+          "id": "dust",
+          "label": "잊힌 라벨",
+          "description": "어디서도 읽지 않는 라벨입니다.",
+          "code": "const dust = \"retired\";",
+          "expr": {
+            "op": "const",
+            "value": "retired"
+          }
+        }
+      ],
+      "scenarios": [
+        {
+          "id": "standard",
+          "label": "일반 고객",
+          "input": {
+            "vip": false
+          }
+        },
+        {
+          "id": "vip",
+          "label": "VIP 고객",
+          "input": {
+            "vip": true
+          }
+        }
+      ],
+      "roots": [
+        {
+          "id": "price-screen",
+          "type": "output",
+          "label": "가격 출력",
+          "card": "route-price"
+        }
+      ]
+    },
+    {
+      "id": "ghost-chain",
+      "title": "GHOST CHAIN",
+      "subtitle": "05 / 연결된 죽은 헬퍼",
+      "mission": "유령처럼 남은 헬퍼 연결을 전부 끊으세요. 하나도 남기지 마세요.",
+      "lesson": "죽은 헬퍼끼리 서로 참조할 수 있습니다. 관찰 가능한 진입점에서 거슬러 확인하세요. 고립된 연결 안의 참조만으로는 살아 있는 코드가 되지 않습니다.",
+      "hint": "헬퍼끼리 호출한다는 사실만으로는 부족합니다. 선언된 진입점에서 그 연결에 닿을 수 있나요?",
+      "cards": [
+        {
+          "id": "active-price",
+          "label": "현재 금액",
+          "description": "현재 영수증이 읽는 입력입니다.",
+          "code": "const activePrice = amount;",
+          "expr": {
+            "op": "input",
+            "key": "amount"
+          }
+        },
+        {
+          "id": "receipt",
+          "label": "현재 영수증",
+          "description": "화면에 표시할 영수증을 만듭니다.",
+          "code": "const receipt = \"TOTAL:\" + activePrice;",
+          "expr": {
+            "op": "concat",
+            "args": [
+              {
+                "op": "const",
+                "value": "TOTAL:"
+              },
+              {
+                "op": "ref",
+                "id": "active-price"
+              }
+            ]
+          }
+        },
+        {
+          "id": "helper-a",
+          "label": "이전 접두어",
+          "description": "사용하지 않는 헬퍼 연결에서만 읽습니다.",
+          "code": "const helperA = () => \"legacy\";",
+          "expr": {
+            "op": "const",
+            "value": "legacy"
+          }
+        },
+        {
+          "id": "helper-b",
+          "label": "이전 캐시",
+          "description": "다른 죽은 헬퍼에 의존합니다.",
+          "code": "const helperB = () => helperA() + \":cache\";",
+          "expr": {
+            "op": "concat",
+            "args": [
+              {
+                "op": "ref",
+                "id": "helper-a"
+              },
+              {
+                "op": "const",
+                "value": ":cache"
+              }
+            ]
+          }
+        },
+        {
+          "id": "helper-c",
+          "label": "이전 진입 헬퍼",
+          "description": "이 헬퍼 연결을 호출하는 진입점은 없습니다.",
+          "code": "const helperC = () => helperB();",
+          "expr": {
+            "op": "ref",
+            "id": "helper-b"
+          }
+        }
+      ],
+      "scenarios": [
+        {
+          "id": "twelve",
+          "label": "12 크레딧",
+          "input": {
+            "amount": 12
+          }
+        },
+        {
+          "id": "zero",
+          "label": "0 크레딧",
+          "input": {
+            "amount": 0
+          }
+        }
+      ],
+      "roots": [
+        {
+          "id": "receipt-screen",
+          "type": "output",
+          "label": "영수증 출력",
+          "card": "receipt"
+        }
+      ]
+    },
+    {
+      "id": "side-effects",
+      "title": "LIVE WIRES",
+      "subtitle": "06 / 반환값과 효과",
+      "mission": "알림과 주문 저장은 지키세요. 효과가 없는 옛 반환값만 제거하세요.",
+      "lesson": "반환값을 사용하지 않아도 호출 자체에는 효과가 있을 수 있습니다. 알림과 저장은 반환값을 무시해도 순서까지 보존해야 하는 관찰 대상입니다.",
+      "hint": "진입점 목록을 확인하세요. 알림과 저장은 효과가 있지만 옛 순수 반환값은 아무도 사용하지 않습니다.",
+      "cards": [
+        {
+          "id": "total",
+          "label": "결제 금액",
+          "description": "화면과 고객 알림에서 사용하는 금액입니다.",
+          "code": "const total = amount;",
+          "expr": {
+            "op": "input",
+            "key": "amount"
+          }
+        },
+        {
+          "id": "notify",
+          "label": "고객 알림",
+          "description": "선언된 알림 효과가 이 내용을 전달합니다.",
+          "code": "notifyCustomer(\"PAID \" + total);",
+          "expr": {
+            "op": "concat",
+            "args": [
+              {
+                "op": "const",
+                "value": "PAID "
+              },
+              {
+                "op": "ref",
+                "id": "total"
+              }
+            ]
+          }
+        },
+        {
+          "id": "save",
+          "label": "주문 저장",
+          "description": "선언된 저장 효과가 이 주문 ID를 저장합니다.",
+          "code": "saveOrder(orderId);",
+          "expr": {
+            "op": "input",
+            "key": "order-id"
+          }
+        },
+        {
+          "id": "old-return",
+          "label": "사용하지 않는 옛 반환값",
+          "description": "관찰 가능한 곳에서 사용하지 않는 순수 값입니다.",
+          "code": "const oldReturn = null;",
+          "expr": {
+            "op": "const",
+            "value": null
+          }
+        }
+      ],
+      "scenarios": [
+        {
+          "id": "payment",
+          "label": "결제된 주문",
+          "input": {
+            "amount": 42,
+            "order-id": "order-7"
+          }
+        },
+        {
+          "id": "refund",
+          "label": "0원 결제",
+          "input": {
+            "amount": 0,
+            "order-id": "order-8"
+          }
+        }
+      ],
+      "roots": [
+        {
+          "id": "payment-screen",
+          "type": "output",
+          "label": "결제 금액 출력",
+          "card": "total"
+        },
+        {
+          "id": "payment-notice",
+          "type": "effect",
+          "label": "고객에게 알림",
+          "card": "notify",
+          "channel": "notify"
+        },
+        {
+          "id": "persist-order",
+          "type": "effect",
+          "label": "주문 저장",
+          "card": "save",
+          "channel": "store"
+        }
+      ]
+    },
+    {
+      "id": "callback-dispatch",
+      "title": "AFTER HOURS",
+      "subtitle": "07 / 콜백 진입점",
+      "mission": "화면만 호출자가 아닙니다. 등록된 이벤트 핸들러를 보존하세요.",
+      "lesson": "표시된 코드에 일반적인 직접 호출이 없어도 디스패처가 콜백을 호출할 수 있습니다. 등록된 콜백은 진입점이며 그 의존성도 유지해야 합니다.",
+      "hint": "디스패처에는 등록된 콜백 진입점이 있습니다. 등록되지 않은 수동 헬퍼에는 호출자가 없습니다.",
+      "cards": [
+        {
+          "id": "label",
+          "label": "상태 라벨",
+          "description": "화면과 콜백이 모두 사용하는 라벨입니다.",
+          "code": "const label = \"READY\";",
+          "expr": {
+            "op": "const",
+            "value": "READY"
+          }
+        },
+        {
+          "id": "event-name",
+          "label": "발생한 이벤트",
+          "description": "선언된 디스패처가 전달하는 이벤트입니다.",
+          "code": "const eventName = event;",
+          "expr": {
+            "op": "input",
+            "key": "event"
+          }
+        },
+        {
+          "id": "on-open",
+          "label": "등록된 콜백",
+          "description": "콜백 진입점에서 호출하는 핸들러입니다.",
+          "code": "onEvent(() => label + \":\" + eventName);",
+          "expr": {
+            "op": "concat",
+            "args": [
+              {
+                "op": "concat",
+                "args": [
+                  {
+                    "op": "ref",
+                    "id": "label"
+                  },
+                  {
+                    "op": "const",
+                    "value": ":"
+                  }
+                ]
+              },
+              {
+                "op": "ref",
+                "id": "event-name"
+              }
+            ]
+          }
+        },
+        {
+          "id": "manual-helper",
+          "label": "수동 헬퍼",
+          "description": "등록하거나 호출하는 곳이 없는 헬퍼입니다.",
+          "code": "const manualHelper = () => \"manual\";",
+          "expr": {
+            "op": "const",
+            "value": "manual"
+          }
+        }
+      ],
+      "scenarios": [
+        {
+          "id": "open",
+          "label": "열기 이벤트",
+          "input": {
+            "event": "open"
+          }
+        },
+        {
+          "id": "retry",
+          "label": "재시도 이벤트",
+          "input": {
+            "event": "retry"
+          }
+        }
+      ],
+      "roots": [
+        {
+          "id": "status-screen",
+          "type": "output",
+          "label": "상태 출력",
+          "card": "label"
+        },
+        {
+          "id": "event-dispatch",
+          "type": "callback",
+          "label": "등록된 이벤트 콜백",
+          "card": "on-open"
+        }
+      ]
+    },
+    {
+      "id": "external-boundary",
+      "title": "UNKNOWN CALLER",
+      "subtitle": "08 / 알 수 없는 외부 호출",
+      "mission": "내보낸 훅의 사용처를 짐작하지 마세요. 보이지 않는 분기도 지키세요.",
+      "lesson": "선언된 실행 흔적만으로 외부 호출자가 내보낸 훅을 어떻게 사용할지 증명할 수 없습니다. 이 모델은 훅과 모든 의존성을 보수적으로 보존하며 고립된 잔재만 제거합니다.",
+      "hint": "외부 진입점은 모든 표본의 실행 흔적에 없는 분기를 포함해 양쪽 의존성을 보호합니다.",
+      "cards": [
+        {
+          "id": "screen",
+          "label": "로컬 화면",
+          "description": "로컬에서 표시하는 결과입니다.",
+          "code": "const screen = current;",
+          "expr": {
+            "op": "input",
+            "key": "current"
+          }
+        },
+        {
+          "id": "external-gate",
+          "label": "외부 인자",
+          "description": "로컬 표본에서는 거짓이지만 외부 호출 조건을 모두 열거하지는 않습니다.",
+          "code": "const externalGate = enabled;",
+          "expr": {
+            "op": "input",
+            "key": "enabled"
+          }
+        },
+        {
+          "id": "partner-path",
+          "label": "파트너 경로",
+          "description": "알 수 없는 외부 호출자가 선택할 수 있는 분기입니다.",
+          "code": "const partnerPath = \"partner\";",
+          "expr": {
+            "op": "const",
+            "value": "partner"
+          }
+        },
+        {
+          "id": "local-path",
+          "label": "로컬 경로",
+          "description": "표본의 외부 호출에서 선택하는 분기입니다.",
+          "code": "const localPath = \"local\";",
+          "expr": {
+            "op": "const",
+            "value": "local"
+          }
+        },
+        {
+          "id": "public-hook",
+          "label": "내보낸 훅",
+          "description": "외부 진입점이 이 훅의 모든 의존성을 보호합니다.",
+          "code": "export const publicHook = () => externalGate ? partnerPath : localPath;",
+          "expr": {
+            "op": "choose",
+            "test": {
+              "op": "ref",
+              "id": "external-gate"
+            },
+            "yes": {
+              "op": "ref",
+              "id": "partner-path"
+            },
+            "no": {
+              "op": "ref",
+              "id": "local-path"
+            }
+          }
+        },
+        {
+          "id": "scrap",
+          "label": "고립된 잔재",
+          "description": "로컬 진입점과 외부 진입점 모두 이 값에 닿지 않습니다.",
+          "code": "const scrap = \"unused\";",
+          "expr": {
+            "op": "const",
+            "value": "unused"
+          }
+        }
+      ],
+      "scenarios": [
+        {
+          "id": "screen-a",
+          "label": "로컬 표본 A",
+          "input": {
+            "current": "screen A",
+            "enabled": false
+          }
+        },
+        {
+          "id": "screen-b",
+          "label": "로컬 표본 B",
+          "input": {
+            "current": "screen B",
+            "enabled": false
+          }
+        }
+      ],
+      "roots": [
+        {
+          "id": "local-screen",
+          "type": "output",
+          "label": "로컬 화면 출력",
+          "card": "screen"
+        },
+        {
+          "id": "partner-api",
+          "type": "external",
+          "label": "알 수 없는 외부 호출자",
+          "card": "public-hook",
+          "unknown": true
+        }
+      ]
+    }
+  ]
+}
